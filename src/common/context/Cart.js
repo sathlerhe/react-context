@@ -6,10 +6,18 @@ CartContext.displayName = "Cart";
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [quantityOfProducts, setQuantityOfProducts] = useState(0);
+  const [totalValueOfProducts, setTotalValueOfProducts] = useState(0);
 
   return (
     <CartContext.Provider
-      value={{ cart, setCart, quantityOfProducts, setQuantityOfProducts }}
+      value={{
+        cart,
+        setCart,
+        quantityOfProducts,
+        setQuantityOfProducts,
+        totalValueOfProducts,
+        setTotalValueOfProducts,
+      }}
     >
       {children}
     </CartContext.Provider>
@@ -17,8 +25,14 @@ export const CartProvider = ({ children }) => {
 };
 
 export const useCartContext = () => {
-  const { cart, setCart, quantityOfProducts, setQuantityOfProducts } =
-    useContext(CartContext);
+  const {
+    cart,
+    setCart,
+    quantityOfProducts,
+    setQuantityOfProducts,
+    totalValueOfProducts,
+    setTotalValueOfProducts,
+  } = useContext(CartContext);
 
   const changeQuantity = (id, quantity) => {
     return cart.map((cartItem) => {
@@ -57,17 +71,17 @@ export const useCartContext = () => {
   };
 
   useEffect(() => {
-    const countQuantityOfProducts = () => {
-      let count = 0;
-      for (let i = 0; i < cart.length; i++) {
-        count += cart[i].quantidade;
-      }
+    let count = 0;
+    let value = 0;
+    for (let i = 0; i < cart.length; i++) {
+      count += cart[i].quantidade;
 
-      setQuantityOfProducts(count);
-    };
+      value = value + (cart[i].valor * cart[i].quantidade);
+    }
 
-    countQuantityOfProducts();
-  }, [cart, setQuantityOfProducts]);
+    setTotalValueOfProducts(value);
+    setQuantityOfProducts(count);
+  }, [cart, setQuantityOfProducts, setTotalValueOfProducts]);
 
   return {
     cart,
@@ -76,5 +90,6 @@ export const useCartContext = () => {
     removeProduct,
     quantityOfProducts,
     setQuantityOfProducts,
+    totalValueOfProducts,
   };
 };
