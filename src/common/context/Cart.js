@@ -1,4 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { usePaymentContext } from "./Payment";
+import { UserContext } from "./User";
 
 export const CartContext = createContext();
 CartContext.displayName = "Cart";
@@ -33,6 +35,8 @@ export const useCartContext = () => {
     totalValueOfProducts,
     setTotalValueOfProducts,
   } = useContext(CartContext);
+  const { paymentForm } = usePaymentContext();
+  const { setBalance } = useContext(UserContext);
 
   const changeQuantity = (id, quantity) => {
     return cart.map((cartItem) => {
@@ -70,18 +74,23 @@ export const useCartContext = () => {
     setCart((prev) => prev.filter((cartItem) => cartItem.id !== id));
   };
 
+  const handleBuy = () => {
+    setBalance((prev) => prev - totalValueOfProducts);
+    setCart([]);
+  };
+
   useEffect(() => {
     let count = 0;
     let value = 0;
     for (let i = 0; i < cart.length; i++) {
       count += cart[i].quantidade;
 
-      value = value + (cart[i].valor * cart[i].quantidade);
+      value = value + cart[i].valor * cart[i].quantidade;
     }
 
-    setTotalValueOfProducts(value);
+    setTotalValueOfProducts(value * paymentForm.tax);
     setQuantityOfProducts(count);
-  }, [cart, setQuantityOfProducts, setTotalValueOfProducts]);
+  }, [cart, setQuantityOfProducts, setTotalValueOfProducts, paymentForm]);
 
   return {
     cart,
@@ -91,5 +100,6 @@ export const useCartContext = () => {
     quantityOfProducts,
     setQuantityOfProducts,
     totalValueOfProducts,
+    handleBuy
   };
 };
